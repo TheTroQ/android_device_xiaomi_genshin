@@ -14,7 +14,7 @@ fi
 set -e
 
 # Required!
-export DEVICE=phoenix
+export DEVICE=genshin
 export DEVICE_COMMON=sm6150-common
 export VENDOR=xiaomi
 

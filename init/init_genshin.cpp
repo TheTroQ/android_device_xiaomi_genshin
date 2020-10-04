@@ -48,29 +48,29 @@ constexpr const char *RO_PROP_SOURCES[] = {
 };
 
 constexpr const char *BRANDS[] = {
-    "Redmi",
+    "POCO",
     "POCO",
 };
 
 constexpr const char *PRODUCTS[] = {
-    "phoenix",
-    "phoenixin",
+    "karna",
+    "surya",
 };
 
 constexpr const char *DEVICES[] = {
-    "Redmi K30",
-    "POCO X2",
+    "POCO X3",
+    "POCO X3 NFC",
 };
 
 constexpr const char *BUILD_DESCRIPTION[] = {
-    "phoenix-user 10 QKQ1.190825.002 V12.0.3.0.QGHCNXM release-keys",
-    "phoenixin-user 10 QKQ1.190825.002 V11.0.11.0.QGHINXM release-keys",
+    "karna-user 10 QKQ1.200512.002 V12.0.2.0.QJGMIXM release-keys",
+    "surya-user 10 QKQ1.200512.002 V12.0.2.0.QJGMIXM release-keys",
 };
 
 constexpr const char *BUILD_FINGERPRINT[] = {
-    "Redmi/phoenix/phoenix:10/QKQ1.190825.002/V12.0.3.0.QGHCNXM:user/"
+    "google/coral/coral:11/RP1A.200720.009/6720564:user/"
     "release-keys",
-    "POCO/phoenixin/phoenixin:10/QKQ1.190825.002/V11.0.11.0.QGHINXM:user/"
+    "google/coral/coral:11/RP1A.200720.009/6720564:user/"
     "release-keys",
 };
 
