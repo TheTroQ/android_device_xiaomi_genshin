@@ -1,142 +1,96 @@
 /*
-   Copyright (c) 2015, The Linux Foundation. All rights reserved.
-   Copyright (C) 2016 The CyanogenMod Project.
-   Copyright (C) 2019-2020 The LineageOS Project.
-
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are
-   met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of The Linux Foundation nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-   THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
-   WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
-   ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
-   BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
-   BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
-   WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-   OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Copyright (C) 2020 The LineageOS Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
-#include <fstream>
-#include <unistd.h>
+#include <cstdlib>
+#include <cstring>
+#include <sys/sysinfo.h>
 #include <vector>
 
 #include <android-base/properties.h>
 #define _REALLY_INCLUDE_SYS__SYSTEM_PROPERTIES_H_
 #include <sys/_system_properties.h>
 
-#include "property_service.h"
+#include "init_common.h"
 #include "vendor_init.h"
 
 using android::base::GetProperty;
-using android::init::property_set;
 
-constexpr const char *RO_PROP_SOURCES[] = {
-    nullptr,   "product.", "product_services.", "odm.",
-    "vendor.", "system.",  "bootimage.",
-};
-
-constexpr const char *BRANDS[] = {
-    "POCO",
-    "POCO",
-};
-
-constexpr const char *PRODUCTS[] = {
-    "karna",
-    "surya",
-};
-
-constexpr const char *DEVICES[] = {
-    "POCO X3",
-    "POCO X3 NFC",
-};
-
-constexpr const char *BUILD_DESCRIPTION[] = {
-    "karna-user 10 QKQ1.200512.002 V12.0.2.0.QJGMIXM release-keys",
-    "surya-user 10 QKQ1.200512.002 V12.0.2.0.QJGMIXM release-keys",
-};
-
-constexpr const char *BUILD_FINGERPRINT[] = {
-    "google/coral/coral:11/RP1A.200720.009/6720564:user/"
-    "release-keys",
-    "google/coral/coral:11/RP1A.200720.009/6720564:user/"
-    "release-keys",
-};
-
-constexpr const char *CLIENT_ID[] = {
-    "android-xiaomi",
-    "android-xiaomi-rev1",
+std::vector<std::string> ro_props_default_source_order = {
+    "",
+    "odm.",
+    "product.",
+    "system.",
+    "vendor.",
 };
 
 void property_override(char const prop[], char const value[], bool add = true) {
-  prop_info *pi;
+    prop_info *pi;
 
-  pi = (prop_info *)__system_property_find(prop);
-  if (pi)
-    __system_property_update(pi, value, strlen(value));
-  else if (add)
-    __system_property_add(prop, strlen(prop), value, strlen(value));
+    pi = (prop_info *)__system_property_find(prop);
+    if (pi)
+        __system_property_update(pi, value, strlen(value));
+    else if (add)
+        __system_property_add(prop, strlen(prop), value, strlen(value));
 }
 
-void load_props(const char *model, bool is_in = false) {
-  const auto ro_prop_override = [](const char *source, const char *prop,
-                                   const char *value, bool product) {
-    std::string prop_name = "ro.";
+void set_ro_build_prop(const std::string &source, const std::string &prop,
+        const std::string &value, bool product = false) {
+    std::string prop_name;
 
-    if (product)
-      prop_name += "product.";
-    if (source != nullptr)
-      prop_name += source;
-    if (!product)
-      prop_name += "build.";
-    prop_name += prop;
-
-    property_override(prop_name.c_str(), value);
-  };
-
-  for (const auto &source : RO_PROP_SOURCES) {
-    ro_prop_override(source, "device", is_in ? PRODUCTS[1] : PRODUCTS[0], true);
-    ro_prop_override(source, "model", model, true);
-    if (!is_in) {
-      ro_prop_override(source, "brand", BRANDS[0], true);
-      ro_prop_override(source, "name", PRODUCTS[0], true);
-      ro_prop_override(source, "fingerprint", BUILD_FINGERPRINT[0], false);
+    if (product) {
+        prop_name = "ro.product." + source + prop;
     } else {
-      ro_prop_override(source, "brand", BRANDS[1], true);
-      ro_prop_override(source, "name", PRODUCTS[1], true);
-      ro_prop_override(source, "fingerprint", BUILD_FINGERPRINT[1], false);
+        prop_name = "ro." + source + "build." + prop;
     }
-  }
 
-  if (!is_in) {
-    ro_prop_override(nullptr, "description", BUILD_DESCRIPTION[0], false);
-    property_override("ro.boot.product.hardware.sku", PRODUCTS[0]);
-  } else {
-    ro_prop_override(nullptr, "description", BUILD_DESCRIPTION[1], false);
-    property_override("ro.com.google.clientidbase", CLIENT_ID[0]);
-    property_override("ro.com.google.clientidbase.ms", CLIENT_ID[1]);
-  }
-  ro_prop_override(nullptr, "product", model, false);
+    property_override(prop_name.c_str(), value.c_str(), false);
+}
+
+void set_device_props(const std::string fingerprint, const std::string description,
+        const std::string brand, const std::string device, const std::string model) {
+    for (const auto &source : ro_props_default_source_order) {
+        set_ro_build_prop(source, "fingerprint", fingerprint);
+        set_ro_build_prop(source, "brand", brand, true);
+        set_ro_build_prop(source, "device", device, true);
+        set_ro_build_prop(source, "model", model, true);
+    }
+
+    property_override("ro.build.fingerprint", fingerprint.c_str());
+    property_override("ro.build.description", description.c_str());
+}
+
+void load_device_properties() {
+    std::string hwname = GetProperty("ro.boot.hwname", "");
+    std::string region = GetProperty("ro.boot.hwc", "");
+
+    if (hwname == "karna") {
+    	set_device_props(
+    			"google/coral/coral:11/RP1A.200720.009/6720564:user/release-keys",
+    			"qssi-user 10 QKQ1.200512.002 V12.0.2.0.QJGMIXM release-keys",
+    			"POCO", "karna", "POCO X3");
+        }
+    } else if (hwname == "surya") {
+        set_device_props(
+                "google/coral/coral:11/RP1A.200720.009/6720564:user/release-keys",
+                "qssi-user 10 QKQ1.200512.002 V12.0.2.0.QJGMIXM release-keys",
+                "POCO", "surya", "POCO X3 NFC");
+    } 
 }
 
 void vendor_load_properties() {
-  std::string region;
-  region = GetProperty("ro.boot.hwc", "");
-
-  if (region == "CN") {
-    load_props(DEVICES[0], false);
-  } else if (region == "INDIA") {
-    load_props(DEVICES[1], true);
-  }
+    load_common_properties();
+    load_device_properties();
 }

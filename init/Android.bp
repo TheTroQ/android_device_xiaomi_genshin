@@ -13,12 +13,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 cc_library_static {
     name: "libinit_genshin",
-    srcs: ["init_genshin.cpp"],
     recovery_available: true,
+    srcs: [
+        "init_genshin.cpp"
+    ],
     include_dirs: [
         "system/core/base/include",
         "system/core/init"
+    ],
+    export_include_dirs: [
+        "include"
+    ]
+}
+
+cc_library_static {
+    name: "libinit_genshin",
+    recovery_available: true,
+    srcs: [
+        "init.cpp"
+    ],
+    whole_static_libs: [
+        "libinit_genshin"
     ]
 }
