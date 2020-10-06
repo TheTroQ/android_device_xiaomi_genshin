@@ -88,7 +88,6 @@ void load_device_properties() {
                 "qssi-user 10 QKQ1.200512.002 V12.0.2.0.QJGMIXM release-keys",
                 "POCO", "surya", "POCO X3 NFC");
     } 
-}
 
 void vendor_load_properties() {
     load_common_properties();

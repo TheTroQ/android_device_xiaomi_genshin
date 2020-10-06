@@ -15,7 +15,7 @@
 //
 
 cc_library_static {
-    name: "libinit_genshin",
+    name: "libinit_genshin_full",
     recovery_available: true,
     srcs: [
         "init_genshin.cpp"
@@ -36,6 +36,6 @@ cc_library_static {
         "init.cpp"
     ],
     whole_static_libs: [
-        "libinit_genshin"
+        "libinit_genshin_full"
     ]
 }
