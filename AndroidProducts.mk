@@ -5,4 +5,4 @@
 #
 
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/lineage_genshin.mk
+    $(LOCAL_DIR)/aosp_genshin.mk

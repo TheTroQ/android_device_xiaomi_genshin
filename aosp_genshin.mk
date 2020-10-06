@@ -6,11 +6,12 @@
 
 $(call inherit-product, device/xiaomi/genshin/device.mk)
 
-# Inherit some common Lineage stuff.
-$(call inherit-product, vendor/lineage/config/common_full_phone.mk)
+# Inherit some common AOSP stuff.
+$(call inherit-product, vendor/aosp/config/common_full_phone.mk)
+TARGET_GAPPS_ARCH=arm64
 
 # Device identifier. This must come after all inclusions.
-PRODUCT_NAME := lineage_genshin
+PRODUCT_NAME := aosp_genshin
 PRODUCT_DEVICE := genshin
 PRODUCT_BRAND := Xiaomi
 PRODUCT_MODEL := SM6150
